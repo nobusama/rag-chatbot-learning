@@ -188,4 +188,18 @@ rag_system.add_course_folder("../docs", clear_existing=True)
 3. Register with `ToolManager` in `rag_system.py`
 
 **To change number of search results:** Modify `MAX_RESULTS` in `config.py` or pass `limit` parameter to `VectorStore.search()`
-- Add to memory. Try "Always use descriptive variable names"
+
+## Important Technical Notes
+
+**Auto-reload behavior:** The server runs with `--reload` flag, so code changes automatically restart the server. No manual restart needed during development.
+
+**ChromaDB persistence:** The database at `backend/chroma_db/` persists across restarts. To rebuild from scratch, delete the directory and restart the server.
+
+**Two-collection design rationale:**
+- `course_catalog`: Fast course name resolution (small collection, only metadata)
+- `course_content`: Detailed content search (large collection, all text chunks)
+
+**Tool-based RAG vs Traditional RAG:**
+- Traditional: Always retrieve → always generate
+- This system: Claude decides when retrieval is needed
+- Benefit: General questions get direct answers without unnecessary searches

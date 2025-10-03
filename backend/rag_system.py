@@ -99,45 +99,61 @@ class RAGSystem:
         
         return total_courses, total_chunks
     
-    def query(self, query: str, session_id: Optional[str] = None) -> Tuple[str, List[str]]:
+    def query(self, query: str, session_id: Optional[str] = None) -> Tuple[str, List[Dict]]:
         """
         Process a user query using the RAG system with tool-based search.
-        
+
         Args:
             query: User's question
             session_id: Optional session ID for conversation context
-            
+
         Returns:
-            Tuple of (response, sources list - empty for tool-based approach)
+            Tuple of (response, sources list as dicts with 'text' and optional 'url' keys)
         """
-        # Create prompt for the AI with clear instructions
-        prompt = f"""Answer this question about course materials: {query}"""
-        
-        # Get conversation history if session exists
-        history = None
-        if session_id:
-            history = self.session_manager.get_conversation_history(session_id)
-        
-        # Generate response using AI with tools
-        response = self.ai_generator.generate_response(
+        # Build prompt and get conversation context
+        prompt = self._build_query_prompt(query)
+        history = self._get_conversation_context(session_id)
+
+        # Generate AI response with tools
+        response = self._generate_ai_response(prompt, history)
+
+        # Collect and reset sources
+        sources = self._collect_sources()
+
+        # Update conversation history
+        self._update_conversation_history(session_id, query, response)
+
+        return response, sources
+
+    def _build_query_prompt(self, query: str) -> str:
+        """Build prompt for the AI"""
+        return f"""Answer this question about course materials: {query}"""
+
+    def _get_conversation_context(self, session_id: Optional[str]) -> Optional[str]:
+        """Get conversation history if session exists"""
+        if not session_id:
+            return None
+        return self.session_manager.get_conversation_history(session_id)
+
+    def _generate_ai_response(self, prompt: str, history: Optional[str]) -> str:
+        """Generate response using AI with tools"""
+        return self.ai_generator.generate_response(
             query=prompt,
             conversation_history=history,
             tools=self.tool_manager.get_tool_definitions(),
             tool_manager=self.tool_manager
         )
-        
-        # Get sources from the search tool
-        sources = self.tool_manager.get_last_sources()
 
-        # Reset sources after retrieving them
+    def _collect_sources(self) -> List[Dict]:
+        """Collect sources from tools and reset"""
+        sources = self.tool_manager.get_last_sources()
         self.tool_manager.reset_sources()
-        
-        # Update conversation history
+        return sources
+
+    def _update_conversation_history(self, session_id: Optional[str], query: str, response: str):
+        """Update conversation history if session exists"""
         if session_id:
             self.session_manager.add_exchange(session_id, query, response)
-        
-        # Return response with sources from tool searches
-        return response, sources
     
     def get_course_analytics(self) -> Dict:
         """Get analytics about the course catalog"""

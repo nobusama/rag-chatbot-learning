@@ -54,3 +54,141 @@ The application will be available at:
 - Web Interface: `http://localhost:8000`
 - API Documentation: `http://localhost:8000/docs`
 
+## 🤖 Claude Code Integration
+
+This repository is integrated with Claude Code! You can:
+- Mention @claude in any PR or issue comment to get AI assistance
+- Request bug fixes, code reviews, documentation updates, and more
+- Claude can help implement features, write tests, and improve code quality
+- See [Claude Code](https://claude.com/claude-code) for more information
+
+## Project Structure
+
+```
+├── backend/          # FastAPI backend application
+│   ├── app.py       # Main FastAPI server and endpoints
+│   ├── rag_system.py # RAG orchestration and tool management
+│   ├── vector_store.py # ChromaDB wrapper for vector search
+│   ├── ai_generator.py # Anthropic Claude API client
+│   ├── search_tools.py # Tool definitions and execution
+│   ├── document_processor.py # Course document parsing and chunking
+│   ├── session_manager.py # Conversation history management
+│   ├── config.py    # Configuration settings
+│   ├── models.py    # Pydantic data models
+│   └── tests/       # Unit and integration tests
+├── frontend/         # Vanilla JavaScript frontend
+│   ├── index.html   # Single-page chat interface
+│   ├── script.js    # API calls and UI logic
+│   └── style.css    # Dark theme styling
+├── docs/            # Course materials (text files)
+├── scripts/         # Utility scripts
+│   ├── format.sh    # Code formatting script
+│   └── quality-check.sh # Code quality checks
+├── .github/         # GitHub workflows and actions
+│   └── workflows/   # CI/CD and Claude Code workflows
+└── CLAUDE.md        # Instructions for Claude Code agent
+```
+
+## Adding Course Materials
+
+To add new course materials to the system:
+
+1. **Prepare your course document** in one of these formats:
+   - Text file (`.txt`)
+   - PDF (`.pdf`)
+   - Word document (`.docx`)
+
+2. **Format your document** with this structure:
+   ```
+   Course Title: [Your Course Title]
+   Course Link: [URL]
+   Course Instructor: [Instructor Name]
+
+   Lesson 0: [Lesson Title]
+   Lesson Link: [URL]
+   [Lesson content...]
+
+   Lesson 1: [Next Lesson Title]
+   Lesson Link: [URL]
+   [Lesson content...]
+   ```
+
+3. **Place the file** in the `docs/` directory
+
+4. **Restart the application** - The system will automatically:
+   - Detect new course files
+   - Parse course metadata and lessons
+   - Chunk content into 800-character segments
+   - Generate embeddings and store in ChromaDB
+   - Skip duplicates based on course title
+
+**Note:** The database persists in `backend/chroma_db/`. To rebuild from scratch, delete this directory before restarting.
+
+## Development
+
+### Running Tests
+
+```bash
+cd backend
+uv run pytest tests/
+```
+
+### Code Quality
+
+Format code:
+```bash
+./scripts/format.sh
+```
+
+Run quality checks:
+```bash
+./scripts/quality-check.sh
+```
+
+### API Endpoints
+
+- `POST /api/query` - Submit a question and receive AI-generated answers
+- `GET /api/courses` - List all available courses
+
+See full API documentation at `http://localhost:8000/docs` when running.
+
+### Architecture Notes
+
+This system uses a **tool-based RAG architecture** where:
+- Claude autonomously decides when to search course content
+- General questions get direct answers without unnecessary retrieval
+- Course-specific queries trigger semantic search via tool use
+- Two ChromaDB collections: `course_catalog` (metadata) and `course_content` (chunks)
+
+See `CLAUDE.md` for detailed architecture documentation.
+
+## Contributing
+
+When contributing to this project:
+
+1. Follow the existing code style (use `./scripts/format.sh`)
+2. Run quality checks before committing (`./scripts/quality-check.sh`)
+3. Update tests for new features
+4. Update documentation as needed
+5. You can mention @claude in PRs for code review assistance
+
+## Troubleshooting
+
+**Application won't start:**
+- Verify Python 3.13+ is installed: `python --version`
+- Check that `.env` file exists with valid `ANTHROPIC_API_KEY`
+- Ensure uv is installed: `uv --version`
+
+**No search results:**
+- Verify course documents are in `docs/` directory
+- Check `backend/chroma_db/` exists (created on first run)
+- Restart application to reindex documents
+
+**Windows users:**
+- Use Git Bash to run shell scripts
+- If `./run.sh` fails, use the manual start method
+
+## License
+
+This project is licensed under the MIT License.
+

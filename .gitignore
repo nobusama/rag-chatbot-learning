@@ -5,6 +5,9 @@ backend/.env
 # Personal Claude instructions
 CLAUDE.local.md
 
+# Learning notes
+learning-notes.md
+
 # Python
 __pycache__/
 *.py[cod]

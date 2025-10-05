@@ -54,6 +54,33 @@ The application will be available at:
 - Web Interface: `http://localhost:8000`
 - API Documentation: `http://localhost:8000/docs`
 
+## Example Queries
+
+Once the application is running, you can try these example queries to explore the system's capabilities:
+
+### General Questions
+- "What is MCP?"
+- "What courses are available?"
+- "Who teaches the course on MCP?"
+
+### Course-Specific Questions
+- "Explain the key concepts in Lesson 1 of the MCP course"
+- "What are the main topics covered in the prompt engineering course?"
+- "How does the MCP course explain server architecture?"
+
+### Follow-up Questions
+The system maintains conversation history, so you can ask follow-up questions like:
+- "Can you give me an example?" (after receiving an explanation)
+- "Tell me more about that" (to dive deeper into a topic)
+- "What's covered in the next lesson?" (to continue learning)
+
+### Technical Queries
+- "What are the prerequisites for the MCP course?"
+- "Show me examples from the prompt engineering lessons"
+- "What tools are discussed in Lesson 3?"
+
+**Tip:** The AI will automatically search course content when needed and provide direct answers for general questions. Try both types to see the difference!
+
 ## 🤖 Claude Code Integration
 
 This repository is integrated with Claude Code! You can:

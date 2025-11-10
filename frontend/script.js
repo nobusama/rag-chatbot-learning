@@ -5,7 +5,7 @@ const API_URL = '/api';
 let currentSessionId = null;
 
 // DOM elements
-let chatMessages, chatInput, sendButton, totalCourses, courseTitles;
+let chatMessages, chatInput, sendButton, totalCourses, courseTitles, newChatButton;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -15,7 +15,8 @@ document.addEventListener('DOMContentLoaded', () => {
     sendButton = document.getElementById('sendButton');
     totalCourses = document.getElementById('totalCourses');
     courseTitles = document.getElementById('courseTitles');
-    
+    newChatButton = document.getElementById('newChatButton');
+
     setupEventListeners();
     createNewSession();
     loadCourseStats();
@@ -28,8 +29,10 @@ function setupEventListeners() {
     chatInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') sendMessage();
     });
-    
-    
+
+    // New Chat button
+    newChatButton.addEventListener('click', handleNewChat);
+
     // Suggested questions
     document.querySelectorAll('.suggested-item').forEach(button => {
         button.addEventListener('click', (e) => {
@@ -122,10 +125,31 @@ function addMessage(content, type, sources = null, isWelcome = false) {
     let html = `<div class="message-content">${displayContent}</div>`;
     
     if (sources && sources.length > 0) {
+        const sourceBoxes = sources.map(source => {
+            if (typeof source === 'string') {
+                // Fallback for old string format
+                return `<div class="source-box no-link">${source}</div>`;
+            }
+
+            // New format with links
+            const text = source.text || 'Unknown Source';
+            const lessonLink = source.lesson_link;
+            const courseLink = source.course_link;
+
+            // Prefer lesson link if available, otherwise use course link
+            const link = lessonLink || courseLink;
+
+            if (link) {
+                return `<a href="${link}" target="_blank" rel="noopener noreferrer" class="source-box">${text}</a>`;
+            } else {
+                return `<div class="source-box no-link">${text}</div>`;
+            }
+        }).join('');
+
         html += `
             <details class="sources-collapsible">
                 <summary class="sources-header">Sources</summary>
-                <div class="sources-content">${sources.join(', ')}</div>
+                <div class="sources-content">${sourceBoxes}</div>
             </details>
         `;
     }
@@ -150,6 +174,17 @@ async function createNewSession() {
     currentSessionId = null;
     chatMessages.innerHTML = '';
     addMessage('Welcome to the Course Materials Assistant! I can help you with questions about courses, lessons and specific content. What would you like to know?', 'assistant', null, true);
+}
+
+function handleNewChat() {
+    // Clear the chat and start fresh
+    createNewSession();
+
+    // Clear any text in the input field
+    chatInput.value = '';
+
+    // Focus the input for immediate typing
+    chatInput.focus();
 }
 
 // Load course statistics
